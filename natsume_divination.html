@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>逆先夏目の魔法占卜屋</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Noto+Serif+SC:wght@300;400;600&family=Noto+Serif+JP:wght@300;400;600&display=swap');
+
+  :root {
+    --deep-night: #05030f;
+    --midnight: #0a0520;
+    --purple-dark: #1a0a3a;
+    --purple-mid: #2d1060;
+    --purple-light: #5a2fa0;
+    --violet: #7c3aed;
+    --indigo: #4f46e5;
+    --gold: #f5c842;
+    --gold-dim: #c9a227;
+    --gold-pale: #fde68a;
+    --teal-glow: #00ffd0;
+    --rose-glow: #ff6eb4;
+    --star-white: #e8e0ff;
+    --text-main: #ddd6fe;
+    --text-dim: #a78bfa;
+    --parchment: #fdf6e3;
+    --parchment-dark: #f0e6c8;
+    --glass-bg: rgba(90, 47, 160, 0.12);
+    --glass-border: rgba(124, 58, 237, 0.35);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--deep-night);
+    color: var(--text-main);
+    font-family: 'Noto Serif SC', 'Noto Serif JP', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ===== STARFIELD BACKGROUND ===== */
+  #starfield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--dur, 3s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+    opacity: var(--opacity, 0.6);
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: var(--opacity, 0.6); transform: scale(1); }
+    50% { opacity: 0.1; transform: scale(0.5); }
+  }
+
+  /* Nebula overlays */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: -10%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(ellipse at center, rgba(91, 33, 182, 0.25) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+    animation: nebula-drift 20s ease-in-out infinite alternate;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -10%;
+    right: -10%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(ellipse at center, rgba(49, 46, 129, 0.3) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+    animation: nebula-drift 25s ease-in-out infinite alternate-reverse;
+  }
+
+  @keyframes nebula-drift {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(40px, 30px) scale(1.1); }
+  }
+
+  /* ===== LAYOUT ===== */
+  .page-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* ===== HEADER ===== */
+  .site-header {
+    text-align: center;
+    padding: 50px 20px 40px;
+    position: relative;
+  }
+
+  .header-deco {
+    font-size: 0.75rem;
+    letter-spacing: 0.4em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  .site-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    background: linear-gradient(135deg, var(--gold-pale) 0%, var(--gold) 40%, var(--rose-glow) 70%, var(--gold-pale) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 5s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(245, 200, 66, 0.4));
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .site-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    font-style: italic;
+  }
+
+  .header-line {
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    margin: 20px auto 0;
+  }
+
+  /* ===== MAIN ORACLE SECTION ===== */
+  .oracle-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 40px 0;
+  }
+
+  /* ===== MAGIC CIRCLE BUTTON ===== */
+  .magic-circle-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 260px;
+    height: 260px;
+    cursor: pointer;
+  }
+
+  .magic-circle-wrapper:hover .ring-outer { animation-play-state: running; animation-duration: 8s; }
+  .magic-circle-wrapper:hover .ring-mid { animation-play-state: running; animation-duration: 6s; }
+  .magic-circle-wrapper:hover .ring-inner { animation-play-state: running; animation-duration: 4s; }
+
+  .ring-outer, .ring-mid, .ring-inner {
+    position: absolute;
+    border-radius: 50%;
+    animation: spin-cw 20s linear infinite;
+    animation-play-state: paused;
+  }
+
+  .ring-outer {
+    width: 240px; height: 240px;
+    border: 1.5px solid rgba(124, 58, 237, 0.5);
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.3), inset 0 0 15px rgba(124, 58, 237, 0.15);
+    animation-direction: normal;
+  }
+
+  .ring-mid {
+    width: 195px; height: 195px;
+    border: 1px solid rgba(245, 200, 66, 0.4);
+    box-shadow: 0 0 10px rgba(245, 200, 66, 0.25);
+    animation-direction: reverse;
+  }
+
+  .ring-inner {
+    width: 150px; height: 150px;
+    border: 1px solid rgba(0, 255, 208, 0.35);
+    box-shadow: 0 0 12px rgba(0, 255, 208, 0.2);
+    animation-direction: normal;
+    animation-duration: 15s;
+    animation-play-state: paused;
+  }
+
+  @keyframes spin-cw {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* SVG magic circle inside */
+  .magic-circle-svg {
+    position: absolute;
+    width: 220px; height: 220px;
+    opacity: 0.5;
+    transition: opacity 0.4s;
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.4; filter: drop-shadow(0 0 6px rgba(124,58,237,0.4)); }
+    50% { opacity: 0.65; filter: drop-shadow(0 0 18px rgba(124,58,237,0.7)); }
+  }
+
+  .magic-circle-wrapper:hover .magic-circle-svg {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 25px rgba(124, 58, 237, 0.9));
+  }
+
+  /* Center orb */
+  .orb {
+    position: relative;
+    z-index: 10;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(200, 180, 255, 0.9), rgba(90, 47, 160, 0.8) 60%, rgba(30, 10, 60, 0.9));
+    box-shadow:
+      0 0 20px rgba(124, 58, 237, 0.6),
+      0 0 40px rgba(124, 58, 237, 0.3),
+      0 0 60px rgba(91, 33, 182, 0.2),
+      inset 0 0 20px rgba(200, 180, 255, 0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+
+  .magic-circle-wrapper:hover .orb {
+    box-shadow:
+      0 0 30px rgba(124, 58, 237, 0.9),
+      0 0 60px rgba(124, 58, 237, 0.5),
+      0 0 80px rgba(91, 33, 182, 0.35),
+      inset 0 0 25px rgba(200, 180, 255, 0.3);
+    transform: scale(1.08);
+  }
+
+  .magic-circle-wrapper:active .orb {
+    transform: scale(0.95);
+    box-shadow:
+      0 0 50px rgba(245, 200, 66, 0.8),
+      0 0 90px rgba(245, 200, 66, 0.4);
+  }
+
+  .circle-label {
+    position: absolute;
+    bottom: -36px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .magic-circle-wrapper.clicked .ring-outer,
+  .magic-circle-wrapper.clicked .ring-mid,
+  .magic-circle-wrapper.clicked .ring-inner {
+    animation-play-state: running;
+    animation-duration: 1.5s !important;
+  }
+
+  /* Sparkle particles */
+  .sparkle {
+    position: absolute;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    pointer-events: none;
+    animation: sparkle-fly 0.8s ease-out forwards;
+    z-index: 20;
+  }
+
+  @keyframes sparkle-fly {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+  }
+
+  /* ===== COOLDOWN STATE ===== */
+  .cooldown-notice {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 24px 36px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    display: none;
+  }
+
+  .cooldown-notice p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    line-height: 1.8;
+  }
+
+  .cooldown-time {
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* ===== RESULT CARD ===== */
+  .result-container {
+    display: none;
+    width: 100%;
+    max-width: 580px;
+    animation: unfurl 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes unfurl {
+    0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .result-card {
+    position: relative;
+    background: linear-gradient(160deg, rgba(253, 246, 227, 0.97) 0%, rgba(240, 230, 200, 0.95) 100%);
+    border-radius: 4px;
+    padding: 44px 40px 36px;
+    color: #3a2a10;
+    box-shadow:
+      0 0 0 1px rgba(201, 162, 39, 0.6),
+      0 0 0 4px rgba(201, 162, 39, 0.15),
+      0 8px 40px rgba(0,0,0,0.5),
+      0 0 60px rgba(245, 200, 66, 0.2);
+    overflow: hidden;
+  }
+
+  /* Parchment texture lines */
+  .result-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgba(180, 150, 80, 0.06) 28px,
+      rgba(180, 150, 80, 0.06) 29px
+    );
+    pointer-events: none;
+  }
+
+  /* Corner ornaments */
+  .result-card::after {
+    content: '✦';
+    position: absolute;
+    top: 12px; right: 14px;
+    font-size: 14px;
+    color: rgba(201, 162, 39, 0.5);
+  }
+
+  .corner-tl {
+    position: absolute;
+    top: 10px; left: 12px;
+    font-size: 14px;
+    color: rgba(201, 162, 39, 0.5);
+  }
+
+  .result-grade {
+    display: inline-block;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    padding: 4px 16px;
+    border-radius: 2px;
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+
+  .grade-daikichi { background: linear-gradient(90deg, #c9a227, #f5c842); color: #3a1a00; }
+  .grade-chukichi { background: linear-gradient(90deg, #7b9e3e, #a4c44a); color: #1a2a00; }
+  .grade-shokichi { background: linear-gradient(90deg, #3a7fbf, #5aa4e0); color: #001a3a; }
+  .grade-kyo { background: linear-gradient(90deg, #7a3030, #b04545); color: #ffe0e0; }
+  .grade-daikyo { background: linear-gradient(90deg, #3a0a0a, #6e1515); color: #ff8080; }
+  .grade-unknown { background: linear-gradient(90deg, #4a2080, #7c3aed); color: #ffe0ff; }
+  .grade-kiguu { background: linear-gradient(90deg, #20607a, #3aaecc); color: #e0ffff; }
+
+  .result-title {
+    font-family: 'Noto Serif JP', 'Noto Serif SC', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2a1a05;
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  .result-body {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: #4a3520;
+    border-top: 1px solid rgba(180, 150, 80, 0.3);
+    padding-top: 14px;
+  }
+
+  .result-seal {
+    position: absolute;
+    bottom: -10px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(150, 20, 20, 0.85), rgba(100, 5, 5, 0.95));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 10px rgba(200, 0, 0, 0.4);
+    transform: rotate(-12deg);
+    border: 2px solid rgba(255, 150, 150, 0.3);
+  }
+
+  .reset-btn {
+    display: block;
+    margin: 20px auto 0;
+    padding: 10px 28px;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    color: var(--text-dim);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.3s;
+    backdrop-filter: blur(5px);
+  }
+
+  .reset-btn:hover {
+    border-color: var(--violet);
+    color: var(--star-white);
+    background: rgba(124, 58, 237, 0.15);
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+  }
+
+  /* ===== KNOWLEDGE SECTION ===== */
+  .knowledge-section {
+    margin-top: 80px;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .section-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    color: var(--gold-pale);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .section-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  .section-divider::before,
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .tab-btn {
+    padding: 8px 18px;
+    background: transparent;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: 20px;
+    color: var(--text-dim);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.05em;
+  }
+
+  .tab-btn:hover {
+    border-color: var(--violet);
+    color: var(--star-white);
+    background: rgba(124, 58, 237, 0.1);
+  }
+
+  .tab-btn.active {
+    background: rgba(124, 58, 237, 0.25);
+    border-color: var(--violet);
+    color: var(--gold-pale);
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.3);
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+    animation: fade-in 0.4s ease;
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Knowledge cards grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .know-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 22px;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .know-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--violet), var(--teal-glow), var(--violet));
+    background-size: 200% 100%;
+    animation: slide-border 4s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .know-card:hover::before { opacity: 1; }
+
+  @keyframes slide-border {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+  }
+
+  .know-card:hover {
+    border-color: rgba(124, 58, 237, 0.6);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3), 0 0 20px rgba(124, 58, 237, 0.15);
+  }
+
+  .know-card-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .know-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gold-pale);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .know-card-text {
+    font-size: 0.82rem;
+    line-height: 1.75;
+    color: var(--text-dim);
+  }
+
+  /* Natsume notes card (special style) */
+  .natsume-note {
+    background: linear-gradient(135deg, rgba(45, 16, 96, 0.5), rgba(26, 10, 58, 0.7));
+    border-color: rgba(245, 200, 66, 0.3);
+    grid-column: span 2;
+  }
+
+  .natsume-note::before { opacity: 1; }
+
+  @media (max-width: 600px) {
+    .natsume-note { grid-column: span 1; }
+  }
+
+  .natsume-note .know-card-title { color: var(--gold); }
+  .natsume-note .know-card-text { color: var(--star-white); }
+
+  /* ===== FOOTER ===== */
+  .site-footer {
+    text-align: center;
+    padding: 40px 20px 20px;
+    color: rgba(167, 139, 250, 0.3);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+  }
+
+  /* ===== SHOOTING STAR ===== */
+  .shooting-star {
+    position: fixed;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .shooting-star::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, white);
+    transform: translateX(100%);
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--deep-night); }
+  ::-webkit-scrollbar-thumb { background: var(--purple-light); border-radius: 3px; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .result-card { padding: 30px 24px 28px; }
+    .result-title { font-size: 1.25rem; }
+    .magic-circle-wrapper { width: 220px; height: 220px; }
+    .ring-outer { width: 200px; height: 200px; }
+    .ring-mid { width: 162px; height: 162px; }
+    .ring-inner { width: 124px; height: 124px; }
+    .magic-circle-svg { width: 185px; height: 185px; }
+    .orb { width: 68px; height: 68px; font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<div class="page-wrapper">
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-deco">✦ &nbsp; MAHOU NO URANAI &nbsp; ✦</div>
+    <h1 class="site-title">逆先夏目の魔法占卜屋</h1>
+    <p class="site-subtitle">点击魔法阵，窥探今日的命运 n~</p>
+    <div class="header-line"></div>
+  </header>
+
+  <!-- ORACLE SECTION -->
+  <section class="oracle-section" id="oracleSection">
+
+    <!-- Magic circle button -->
+    <div class="magic-circle-wrapper" id="magicBtn" onclick="onOracleClick(event)" title="点击魔法阵进行占卜">
+      <div class="ring-outer"></div>
+      <div class="ring-mid"></div>
+      <div class="ring-inner"></div>
+
+      <!-- SVG Magic Circle -->
+      <svg class="magic-circle-svg" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer circle -->
+        <circle cx="110" cy="110" r="105" stroke="rgba(124,58,237,0.6)" stroke-width="0.8" stroke-dasharray="4 3"/>
+        <!-- Pentagram -->
+        <polygon points="110,18 132,84 202,84 146,124 167,190 110,150 53,190 74,124 18,84 88,84"
+                 stroke="rgba(245,200,66,0.5)" stroke-width="0.8" fill="none"/>
+        <!-- Inner circle -->
+        <circle cx="110" cy="110" r="72" stroke="rgba(0,255,208,0.3)" stroke-width="0.7" stroke-dasharray="2 4"/>
+        <!-- Hexagram -->
+        <polygon points="110,52 127,82 160,82 143,108 160,134 127,134 110,164 93,134 60,134 77,108 60,82 93,82"
+                 stroke="rgba(255,110,180,0.35)" stroke-width="0.7" fill="none"/>
+        <!-- Center cross -->
+        <line x1="110" y1="70" x2="110" y2="150" stroke="rgba(200,180,255,0.25)" stroke-width="0.6"/>
+        <line x1="70" y1="110" x2="150" y2="110" stroke="rgba(200,180,255,0.25)" stroke-width="0.6"/>
+        <!-- Rune dots -->
+        <circle cx="110" cy="18" r="2" fill="rgba(245,200,66,0.6)"/>
+        <circle cx="202" cy="84" r="2" fill="rgba(245,200,66,0.6)"/>
+        <circle cx="167" cy="190" r="2" fill="rgba(245,200,66,0.6)"/>
+        <circle cx="53" cy="190" r="2" fill="rgba(245,200,66,0.6)"/>
+        <circle cx="18" cy="84" r="2" fill="rgba(245,200,66,0.6)"/>
+        <!-- Outer rune text circles -->
+        <circle cx="110" cy="110" r="92" stroke="rgba(124,58,237,0.2)" stroke-width="0.5"/>
+      </svg>
+
+      <div class="orb">🔮</div>
+      <div class="circle-label">— 点击以启动占卜 —</div>
+    </div>
+
+    <!-- Cooldown notice -->
+    <div class="cooldown-notice" id="cooldownNotice">
+      <p>✧ 今日的占卜已完成 ✧</p>
+      <p style="margin-top:8px;">魔法需要时间恢复……<br>
+      下次可占卜时间：<span class="cooldown-time" id="cooldownTime"></span></p>
+      <p style="margin-top:12px; font-size:0.82rem; opacity:0.7;">「过度消耗魔力是会被反噬的哦 o~」</p>
+    </div>
+
+    <!-- Result card -->
+    <div class="result-container" id="resultContainer">
+      <div class="result-card">
+        <span class="corner-tl">✦</span>
+        <div class="result-grade" id="resultGrade"></div>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-body" id="resultBody"></div>
+        <div class="result-seal">🌙</div>
+      </div>
+      <button class="reset-btn" onclick="resetOracle()">↩ 重新观看魔法阵</button>
+    </div>
+
+  </section>
+
+  <!-- KNOWLEDGE SECTION -->
+  <section class="knowledge-section">
+    <div class="section-header">
+      <div class="section-divider"><span>✦</span></div>
+      <h2 class="section-title">📜 魔法知識ノート | 煉金術入門</h2>
+      <p class="section-subtitle">由逆先夏目整理编撰 · 禁止外传</p>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('alchemy')">⚗️ 煉金術</button>
+      <button class="tab-btn" onclick="switchTab('circles')">🔯 魔法阵</button>
+      <button class="tab-btn" onclick="switchTab('divination')">🔮 占卜术</button>
+      <button class="tab-btn" onclick="switchTab('natsume')">🐱 夏目笔记</button>
+    </div>
+
+    <!-- Alchemy tab -->
+    <div class="tab-content active" id="tab-alchemy">
+      <div class="cards-grid">
+        <div class="know-card">
+          <div class="know-card-icon">⚖️</div>
+          <div class="know-card-title">等价交换法则</div>
+          <div class="know-card-text">煉金術最基本的原理：欲得到某物，必须付出同等价值之物。宇宙的平衡依赖此法则维系，任何试图绕过它的行为都将受到严厉的反噬。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">💎</div>
+          <div class="know-card-title">贤者之石 · 賢者の石</div>
+          <div class="know-card-text">传说中能够突破等价交换限制的究极材料，可将卑金属变为黄金，也可赋予长生不老之力。历代煉金術师穷其一生追求，却鲜有人见其真容。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🧪</div>
+          <div class="know-card-title">四元素理论</div>
+          <div class="know-card-text">古典煉金術认为万物由「土·水·火·风」四种基本元素构成。理解并操纵元素的比例，是炼金的第一步。现代化学正是由此衍生而来。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🌀</div>
+          <div class="know-card-title">大宇宙与小宇宙</div>
+          <div class="know-card-text">「As above, so below」——天上有什么，地下就有什么。煉金術师相信，通过研究宏观宇宙的规律，可以理解并改变人体（小宇宙）的状态。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">☉</div>
+          <div class="know-card-title">七大行星金属</div>
+          <div class="know-card-text">金（太阳）、银（月亮）、铜（金星）、铁（火星）、水银（水星）、锡（木星）、铅（土星）。每种金属对应天体，具有独特的魔力属性。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🔥</div>
+          <div class="know-card-title">燃素与转化</div>
+          <div class="know-card-text">煉金術的核心目标是「转化」——将低等物质提升到更高的状态。这不仅是物质的转化，更是心灵与灵魂的净化与升华之旅。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Magic circles tab -->
+    <div class="tab-content" id="tab-circles">
+      <div class="cards-grid">
+        <div class="know-card">
+          <div class="know-card-icon">⭐</div>
+          <div class="know-card-title">五芒星 · Pentagram</div>
+          <div class="know-card-text">五个角分别代表土·水·火·风·灵五元素。正立时象征保护与白魔法，倒立时则与黑暗力量相关。是西方魔法中最常见的符文之一。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">✡️</div>
+          <div class="know-card-title">六芒星 · Hexagram</div>
+          <div class="know-card-text">由两个三角形交叠而成，象征天与地、阴与阳的融合统一。所罗门王的封印即用此符，据说可召唤与封印灵体，是最强力的结界符之一。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🔵</div>
+          <div class="know-card-title">圆形结界</div>
+          <div class="know-card-text">魔法阵外围的圆圈是「结界线」，能够容纳并集中魔力，同时防止外部能量干扰施法。圆被视为完美与无限循环的象征。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🌹</div>
+          <div class="know-card-title">玫瑰十字 · Rosicrucian</div>
+          <div class="know-card-text">玫瑰（感性与爱）与十字（苦难与拯救）的结合。蔷薇十字会将此作为核心符号，寓意通过苦难的净化，最终达到灵魂的完美开悟。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">♾️</div>
+          <div class="know-card-title">无穷符 · Ouroboros</div>
+          <div class="know-card-text">衔尾蛇——一条吞噬自己尾巴的蛇，象征永恒的循环、生与死的轮回。在煉金術中代表物质的永恒转化与循环再生，是最古老的魔法符之一。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🌐</div>
+          <div class="know-card-title">魔法阵的构成</div>
+          <div class="know-card-text">一个完整的魔法阵通常包含：外圆（结界）、核心符文（目的）、内接几何图形（元素调用）、以及文字咒文（意志载体）。缺少任何一个部分，魔法都可能失效甚至反噬。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divination tab -->
+    <div class="tab-content" id="tab-divination">
+      <div class="cards-grid">
+        <div class="know-card">
+          <div class="know-card-icon">🃏</div>
+          <div class="know-card-title">塔罗牌 · Tarot</div>
+          <div class="know-card-text">起源于15世纪意大利，共78张牌分为大阿卡纳（22张）与小阿卡纳（56张）。塔罗并非预知未来，而是通过牌面的象征意义，帮助解读当下的内在状态与可能的走向。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🔮</div>
+          <div class="know-card-title">水晶球占卜</div>
+          <div class="know-card-text">通过凝视水晶球的深处，让心灵进入半冥想状态，接收来自潜意识或更高维度的信息。水晶的纯净能量有助于清除思维噪音，使直觉更加清晰敏锐。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">ᚱ</div>
+          <div class="know-card-title">北欧符文 · Runes</div>
+          <div class="know-card-text">北欧神话中由主神奥丁用生命代价换来的古老文字，共24个字母（Elder Futhark），每个符文都有深刻的象征意义。将符文刻于石上，可进行占卜或赋予物品魔力。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">☕</div>
+          <div class="know-card-title">茶叶占卜 · Tasseography</div>
+          <div class="know-card-text">起源于中国，盛行于维多利亚时代的英国。喝完茶后，通过解读茶杯底部茶叶的形状与图案来预测运势。是一种将日常与神秘完美结合的民间占卜术。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🌟</div>
+          <div class="know-card-title">星相学 · Astrology</div>
+          <div class="know-card-text">通过出生时天体的位置来分析人的性格与命运走向，已有超过2000年的历史。占星师认为，宇宙天体的运行与人类的内在节律存在着神秘的共鸣。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">✋</div>
+          <div class="know-card-title">手相学 · Palmistry</div>
+          <div class="know-card-text">通过解读手掌的线条、丘陵与形状，了解一个人的性格、健康与命运倾向。主要关注生命线、智慧线、感情线与命运线，但记住——手相只是参考，命运由自己书写。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Natsume notes tab -->
+    <div class="tab-content" id="tab-natsume">
+      <div class="cards-grid">
+        <div class="know-card natsume-note">
+          <div class="know-card-icon">🐱</div>
+          <div class="know-card-title">夏目の秘密笔记 Vol.1 — 关于猫与魔法的关系 e~</div>
+          <div class="know-card-text">自古以来，猫就与魔法世界有着不可分割的联系。它们能看见人类看不见的东西，感知空间的能量流动。我的黑猫「小夜」每次在我的实验笔记上踩来踩去，都是在帮我检查魔法阵有无错误，真是帮了大忙呢 e~。所以，尊重身边的每一只猫吧，它们可能是你的守护使者哦 o~。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">📖</div>
+          <div class="know-card-title">咒语的本质</div>
+          <div class="know-card-text">咒语的力量不在于发音，而在于说话者的「意志」与「想象力」。一句充满力量的话，哪怕只是低语，也能改变现实的织物。所以，请小心你说出口的每一句话 n~。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🌙</div>
+          <div class="know-card-title">月相与魔力</div>
+          <div class="know-card-text">新月适合播下愿望的种子；满月是魔力最旺盛的时刻，适合施展重要的魔法；残月则适合放下与告别。我每天都会记录月相，这是我的魔法日记的第一页 i~。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🕯️</div>
+          <div class="know-card-title">蜡烛魔法入门</div>
+          <div class="know-card-text">不同颜色的蜡烛代表不同的魔法意图：白色（净化）、红色（热情与保护）、紫色（神秘与直觉）、绿色（繁荣与成长）。点燃时，将你的愿望注入烛火，让烟雾带它上达天听 a~。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">🧿</div>
+          <div class="know-card-title">护符的制作方法</div>
+          <div class="know-card-text">将你的愿望凝练成一个简单的几何图案，画在纸或皮革上，充入意志，这便是最基础的符文护符。不需要什么稀有材料，真诚的心意才是最强大的魔法材料哦 e~。</div>
+        </div>
+        <div class="know-card">
+          <div class="know-card-icon">💊</div>
+          <div class="know-card-title">魔法药草小知识</div>
+          <div class="know-card-text">薰衣草（平静）、迷迭香（记忆与保护）、艾草（增强直觉）……这些常见的植物在魔法传统中都有深刻的含义。泡一杯薰衣草茶，就是给自己施的最温柔的魔法 a~。</div>
+        </div>
+        <div class="know-card natsume-note">
+          <div class="know-card-icon">⚠️</div>
+          <div class="know-card-title">夏目の严肃警告 — 关于「禁忌咒文」n~</div>
+          <div class="know-card-text">我的笔记里有些页面用黑蜡封住了，那是因为里面写着不该轻易尝试的东西。魔法最重要的守则：永远不要用它去伤害他人，也不要用它去强行改变他人的意志。等价交换的法则会将这些恶意加倍奉还给你的哦 o~……不是在开玩笑 n~。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <p>✦ &nbsp; 逆先夏目の魔法占卜屋 &nbsp; ✦</p>
+    <p style="margin-top:6px; font-size:0.7rem; opacity:0.5;">This is a fan-made website. Ensemble Stars! belongs to Happy Elements.</p>
+  </footer>
+</div>
+
+<script>
+// ===== STARFIELD =====
+(function() {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  let shootingStars = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 200; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2 + 0.2,
+        alpha: Math.random() * 0.7 + 0.2,
+        speed: Math.random() * 0.015 + 0.005,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  function drawStars(t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const s of stars) {
+      const a = s.alpha * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(220, 210, 255, ${a})`;
+      ctx.fill();
+    }
+  }
+
+  function spawnShootingStar() {
+    shootingStars.push({
+      x: Math.random() * canvas.width * 0.8,
+      y: Math.random() * canvas.height * 0.4,
+      len: 80 + Math.random() * 80,
+      speed: 6 + Math.random() * 6,
+      alpha: 1,
+      angle: Math.PI / 5 + Math.random() * 0.3
+    });
+  }
+
+  function drawShootingStars() {
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+      const s = shootingStars[i];
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.angle);
+      const grad = ctx.createLinearGradient(-s.len, 0, 0, 0);
+      grad.addColorStop(0, `rgba(255,255,255,0)`);
+      grad.addColorStop(1, `rgba(255,255,255,${s.alpha})`);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-s.len, 0);
+      ctx.lineTo(0, 0);
+      ctx.stroke();
+      ctx.restore();
+      s.x += Math.cos(s.angle) * s.speed;
+      s.y += Math.sin(s.angle) * s.speed;
+      s.alpha -= 0.018;
+      if (s.alpha <= 0) shootingStars.splice(i, 1);
+    }
+  }
+
+  let lastShoot = 0;
+  function animate(t) {
+    drawStars(t * 0.001);
+    drawShootingStars();
+    if (t - lastShoot > 5000 + Math.random() * 5000) {
+      spawnShootingStar();
+      lastShoot = t;
+    }
+    requestAnimationFrame(animate);
+  }
+
+  resize();
+  initStars();
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  requestAnimationFrame(animate);
+})();
+
+// ===== DIVINATION DATA =====
+const RESULTS = [
+  { grade: "大吉", gradeClass: "grade-daikichi", title: "Magic for your \"switch\"", body: "今天的你，运气好到令人吃惊呢 e~。像施展了魔法一样，做什么都会非常顺利，去大胆地尝试吧 a~" },
+  { grade: "中吉", gradeClass: "grade-chukichi", title: "猫之道的指引", body: "黑猫在你前方带路 u~。今天会遇到小小的幸运，可能是意想不到的零食，或者一份温柔的关心。要留心观察哦 o~" },
+  { grade: "中吉", gradeClass: "grade-chukichi", title: "炼金术的启示", body: "就像成功的实验一样，今天的努力会得到相应的回报 o。虽然过程可能有点复杂，但结果是甜美的 e~" },
+  { grade: "小吉", gradeClass: "grade-shokichi", title: "平稳的魔法", body: "今天被平稳的魔法保护着 e~。没有大风大浪，是适合整理房间、复习功课的日常魔法日 i~" },
+  { grade: "凶", gradeClass: "grade-kyo", title: "迷糊咒语", body: "啊啦，今天的咒语好像出错了 e~。可能会有点小迷糊，出门前记得检查三次物品哦 o？不然会像迷路的小猫一样 g~" },
+  { grade: "凶", gradeClass: "grade-kyo", title: "恶作剧魔法", body: "今天要小心恶作剧魔法 a~。可能会遇到计划外的小麻烦，不过，这只是小小的试炼 n~" },
+  { grade: "凶", gradeClass: "grade-kyo", title: "魔法反噬", body: "力量使用过度了 e~？今天容易感到疲惫，要注意休息。晚上泡个暖暖的澡，就是最好的恢复魔法 a~" },
+  { grade: "大凶", gradeClass: "grade-daikyo", title: "混沌漩涡", body: "……（沉默）今天的人际沟通容易产生误会，说话要更清晰直接才行哦 o~" },
+  { grade: "大凶", gradeClass: "grade-daikyo", title: "禁忌咒文", body: "……（沉默）……今天最好不要接触任何禁忌咒文 n~。意思是，不要尝试任何冒险的新事物，乖乖待在自己的安全领域比较好哦 o~" },
+  { grade: "？？？", gradeClass: "grade-unknown", title: "命运分歧点", body: "未来的画面一片模糊 e~。今天是绝对的「随机之日」，任何事情都可能发生，这就是最大的魔法 a~" },
+  { grade: "大吉", gradeClass: "grade-daikichi", title: "王様の祝福！", body: "今天有来自「王様」的灵感加持！创意爆棚，是进行创作或解决难题的绝佳时机 i~。" },
+  { grade: "中吉", gradeClass: "grade-chukichi", title: "迷宫脱出！", body: "困扰你已久的难题，今天会找到意想不到的出口哦 o。就像走出了魔法迷宫一样 g~。" },
+  { grade: "中吉", gradeClass: "grade-chukichi", title: "宝石発見", body: "今天会发现被忽略的美好「宝石」，也可能是一本好书，一句朋友的暖心话 a~。" },
+  { grade: "大吉", gradeClass: "grade-daikichi", title: "魔法契約成立", body: "重要的合作、谈判或约会会非常顺利，如同签订了完美的魔法契约 e~。" },
+  { grade: "大吉", gradeClass: "grade-daikichi", title: "天使の羽根", body: "会有「天使」在你需要时伸出援手 u。别忘了也要成为别人的天使哦 o~。" },
+  { grade: "大吉", gradeClass: "grade-daikichi", title: "錬金術成功", body: "之前的努力今天会看到成果，像炼金术一样将平凡变为黄金 n~。" },
+  { grade: "中吉", gradeClass: "grade-chukichi", title: "迷子の猫保護", body: "你的善良会为你带来好运。帮助他人，自己也会感到温暖 n~。" },
+  { grade: "小吉", gradeClass: "grade-shokichi", title: "魔法薬調合", body: "尝试一些新的组合，比如新的穿搭、新的食物搭配，会有惊喜 i~。" },
+  { grade: "小吉", gradeClass: "grade-shokichi", title: "魔法の鏡", body: "今天适合自我反思，你会发现一个更真实的自己 i~。" },
+  { grade: "中吉", gradeClass: "grade-chukichi", title: "星の導き", body: "夜晚的星空会给你答案。如果犹豫不决，不妨抬头看看天 n~。" },
+  { grade: "小吉", gradeClass: "grade-shokichi", title: "妖精の悪戯", body: "会有一些无伤大雅的小意外，反而让生活变得有趣 u~。" },
+  { grade: "中吉", gradeClass: "grade-chukichi", title: "図書館の邂逅", body: "在知识的海洋里，你会遇到让你心动的一句话或一个概念 n~。" },
+  { grade: "小吉", gradeClass: "grade-shokichi", title: "平和の結界", body: "风平浪静的一天。适合休养生息，积蓄能量 g~。" },
+  { grade: "小吉", gradeClass: "grade-shokichi", title: "日常の魔法", body: "在最普通的日常里，发现隐藏的小小魔法吧 a~。" },
+  { grade: "凶", gradeClass: "grade-kyo", title: "魔法の霧", body: "今天有些判断不清，雾里看花。重要决定最好推迟 i~。" },
+  { grade: "凶", gradeClass: "grade-kyo", title: "呪文忘れ", body: "可能会犯些小错误，忘带东西或说错话。多检查几遍就好 o~。" },
+  { grade: "凶", gradeClass: "grade-kyo", title: "優雅小貓咪", body: "计划可能会被打乱，但要保持优雅，像猫一样灵活应对 i~。" },
+  { grade: "凶", gradeClass: "grade-kyo", title: "月齢不良", body: "情绪可能有些低落，像受到了月亮的影响。吃点甜的会好转 n~。" },
+  { grade: "大凶", gradeClass: "grade-daikyo", title: "幻惑の森", body: "容易被花言巧语或虚假信息迷惑，要擦亮眼睛 g~。" },
+  { grade: "凶", gradeClass: "grade-kyo", title: "時計遅延", body: "交通或行程可能会有延误，提前出发为妙 o~。" },
+  { grade: "凶", gradeClass: "grade-kyo", title: "悪戯妖精", body: "小心恶作剧，可能是朋友间的玩笑，但别过火 o~。" },
+  { grade: "大凶", gradeClass: "grade-daikyo", title: "偽の魔法書", body: "可能会接触到错误的信息源，注意甄别 e~。" },
+  { grade: "凶", gradeClass: "grade-kyo", title: "魔力不足", body: "可能会感到疲惫和无力，今天是你的充电日 i~。" },
+  { grade: "大凶", gradeClass: "grade-daikyo", title: "混沌の渦", body: "人际关系可能出现混乱，要避免卷入是非 i~。" },
+  { grade: "大凶", gradeClass: "grade-daikyo", title: "破れた契約", body: "原定的计划或约定有变动的风险，做好备用方案 n~。" },
+  { grade: "大凶", gradeClass: "grade-daikyo", title: "禁忌の書庫", body: "千万不要触碰他人的隐私和底线，否则会引来大麻烦哦 o~。" },
+  { grade: "大凶", gradeClass: "grade-daikyo", title: "絶対絶命", body: "可能会面临一个棘手的困境，寻求朋友或前辈的帮助吧 a~。" },
+  { grade: "奇遇", gradeClass: "grade-kiguu", title: "皇帝のお茶会", body: "可能会被位高权重的人邀请，注意礼仪，少说话多微笑 e~。" },
+  { grade: "奇遇", gradeClass: "grade-kiguu", title: "海底王国への招待", body: "今天会对「水」有特别的亲近感，听听水流的声音能让你平静 e~。" },
+  { grade: "奇遇", gradeClass: "grade-kiguu", title: "忍者足音", body: "会意外发现一个秘密，但知道了也请装作不知道哦 e~？" },
+  { grade: "奇遇", gradeClass: "grade-kiguu", title: "宙の彼方から", body: "你的思维会变得异常开阔，能理解一些平时觉得「不可思议」的事情 e~。" },
+  { grade: "奇遇", gradeClass: "grade-kiguu", title: "工作室の熱情", body: "可能会被一位热情洋溢的「制造家」前辈拉着帮忙，小心不要受伤 e~。" },
+  { grade: "奇遇", gradeClass: "grade-kiguu", title: "永遠の夢現", body: "今天会做一个非常逼真且美丽的梦，醒来后也会回味无穷 e~。" },
+  { grade: "奇遇", gradeClass: "grade-kiguu", title: "人形の舞踏会", body: "会看到一场极致的艺术表演，或者自己动手创造出美丽的作品 e~。" },
+  { grade: "奇遇", gradeClass: "grade-kiguu", title: "嵐の前の静寂", body: "某个组合正在酝酿一场「风暴」，而你恰好是旁观者 e~。" },
+  { grade: "奇遇", gradeClass: "grade-kiguu", title: "逆先夏目直伝", body: "今天的你，特别适合学习一些神秘学或手工制作，会很有天赋 e~。" },
+  { grade: "？？？", gradeClass: "grade-unknown", title: "深夜の訪客", body: "今晚可能会遇到一位优雅的「吸血鬼」前辈，并被他分享一些……有趣的经验 e~。" }
+];
+
+// ===== COOLDOWN LOGIC (localStorage) =====
+const STORAGE_KEY = 'natsume_oracle_date';
+const RESULT_KEY = 'natsume_oracle_result';
+
+function getTodayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function getNextMidnight() {
+  const now = new Date();
+  const next = new Date(now);
+  next.setHours(24, 0, 0, 0);
+  return next;
+}
+
+function formatCountdown(ms) {
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  return `${h}小时${m}分钟后`;
+}
+
+let cooldownInterval = null;
+
+function checkCooldown() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved === getTodayStr()) {
+    const savedIdx = parseInt(localStorage.getItem(RESULT_KEY) || '0');
+    showResult(RESULTS[savedIdx], false);
+    return true;
+  }
+  return false;
+}
+
+function showCooldown() {
+  document.getElementById('magicBtn').style.display = 'none';
+  document.getElementById('cooldownNotice').style.display = 'block';
+  document.getElementById('resultContainer').style.display = 'none';
+
+  function updateTime() {
+    const next = getNextMidnight();
+    const ms = next - new Date();
+    document.getElementById('cooldownTime').textContent = formatCountdown(ms);
+  }
+  updateTime();
+  if (cooldownInterval) clearInterval(cooldownInterval);
+  cooldownInterval = setInterval(updateTime, 60000);
+}
+
+// ===== ORACLE LOGIC =====
+let hasDrawn = false;
+
+function onOracleClick(event) {
+  if (hasDrawn) return;
+  if (checkCooldown()) return;
+
+  const btn = document.getElementById('magicBtn');
+  btn.classList.add('clicked');
+
+  // Sparkles
+  const rect = btn.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  for (let i = 0; i < 12; i++) {
+    createSparkle(cx, cy);
+  }
+
+  setTimeout(() => {
+    btn.classList.remove('clicked');
+    const idx = Math.floor(Math.random() * RESULTS.length);
+    localStorage.setItem(STORAGE_KEY, getTodayStr());
+    localStorage.setItem(RESULT_KEY, idx.toString());
+    showResult(RESULTS[idx], true);
+  }, 900);
+}
+
+function createSparkle(cx, cy) {
+  const el = document.createElement('div');
+  el.className = 'sparkle';
+  const angle = Math.random() * Math.PI * 2;
+  const dist = 60 + Math.random() * 80;
+  el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+  el.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+  el.style.left = (cx - 2) + 'px';
+  el.style.top = (cy - 2) + 'px';
+  el.style.position = 'fixed';
+  el.style.zIndex = '999';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+function showResult(data, animate) {
+  hasDrawn = true;
+  document.getElementById('magicBtn').style.display = 'none';
+  document.getElementById('cooldownNotice').style.display = 'none';
+
+  const container = document.getElementById('resultContainer');
+  const gradeEl = document.getElementById('resultGrade');
+  const titleEl = document.getElementById('resultTitle');
+  const bodyEl = document.getElementById('resultBody');
+
+  gradeEl.textContent = data.grade;
+  gradeEl.className = 'result-grade ' + data.gradeClass;
+  titleEl.textContent = data.title;
+  bodyEl.textContent = data.body;
+
+  container.style.display = 'block';
+  if (animate) {
+    container.style.animation = 'none';
+    void container.offsetWidth;
+    container.style.animation = 'unfurl 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards';
+  }
+}
+
+function resetOracle() {
+  hasDrawn = false;
+  document.getElementById('resultContainer').style.display = 'none';
+  document.getElementById('cooldownNotice').style.display = 'none';
+
+  const btn = document.getElementById('magicBtn');
+  btn.style.display = 'flex';
+
+  // Check if already used today → show cooldown again
+  if (localStorage.getItem(STORAGE_KEY) === getTodayStr()) {
+    showCooldown();
+  }
+}
+
+// ===== TABS =====
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded', () => {
+  // Check cooldown on load
+  if (localStorage.getItem(STORAGE_KEY) === getTodayStr()) {
+    showCooldown();
+    const savedIdx = parseInt(localStorage.getItem(RESULT_KEY) || '0');
+    // Show result card below cooldown
+    const container = document.getElementById('resultContainer');
+    const gradeEl = document.getElementById('resultGrade');
+    const titleEl = document.getElementById('resultTitle');
+    const bodyEl = document.getElementById('resultBody');
+    const data = RESULTS[savedIdx];
+    gradeEl.textContent = data.grade;
+    gradeEl.className = 'result-grade ' + data.gradeClass;
+    titleEl.textContent = data.title;
+    bodyEl.textContent = data.body;
+    container.style.display = 'block';
+    hasDrawn = true;
+  }
+});
+</script>
+</body>
+</html>
